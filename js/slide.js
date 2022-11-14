@@ -1,8 +1,11 @@
+import debounce from "./debounce.js";
+
 export default class Slide {
-  constructor(slide, wrapper) {
+  constructor(slide, wrapper, activeClass) {
     this.slide = document.querySelector(slide);
     this.wrapper = document.querySelector(wrapper);
     this.dist = { finalPosition: 0, startX: 0, movement: 0 };
+    this.activeClass = activeClass;
   }
 
   transition(active) {
@@ -70,6 +73,7 @@ export default class Slide {
     this.onStart = this.onStart.bind(this);
     this.onEnd = this.onEnd.bind(this);
     this.onMove = this.onMove.bind(this);
+    this.onResize = debounce(this.onResize.bind(this), 200);
   }
 
   // slides config
@@ -103,6 +107,7 @@ export default class Slide {
     this.slidesIndexNav(index);
     this.moveSlide(activeSlide.position);
     this.dist.finalPosition = activeSlide.position;
+    this.changeActiveSlide();
   }
 
   activeNextSlide() {
@@ -113,11 +118,28 @@ export default class Slide {
     if (this.index.prev !== undefined) this.changeSlide(this.index.prev);
   }
 
+  changeActiveSlide() {
+    this.slidesArray.forEach((item) => item.element.classList.remove(this.activeClass));
+    this.slidesArray[this.index.active].element.classList.add(this.activeClass);
+  }
+
+  onResize() {
+    setTimeout(() => {
+      this.slidesConfig();
+      this.changeSlide(this.index.active);
+    }, 1000);
+  }
+
+  addResizeEvent() {
+    window.addEventListener("resize", this.onResize);
+  }
+
   init() {
     this.bindEvents();
     this.addSlideEvents();
     this.transition(false);
     this.slidesConfig();
+    this.addResizeEvent();
     return this;
   }
 }
