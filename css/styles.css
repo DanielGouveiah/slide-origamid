@@ -44,3 +44,27 @@ img {
   opacity: 1;
   transform: scale(1);
 }
+
+[data-control="slide"] {
+  display: flex;
+  align-self: center;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+[data-control="slide"] li {
+  width: 12px;
+  height: 12px;
+  padding: 2px;
+  background-color: #fb5;
+  border-radius: 50%;
+  text-indent: -999px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+[data-control="slide"] li.active,
+[data-control="slide"] li:hover {
+  background-color: #e54;
+}

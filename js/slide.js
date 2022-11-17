@@ -7,6 +7,7 @@ export default class Slide {
 
     this.dist = { finalPosition: 0, startX: 0, movement: 0 };
     this.activeClass = activeClass;
+    this.changeEvent = new Event("changeEvent");
   }
 
   transition(active) {
@@ -111,6 +112,8 @@ export default class Slide {
     this.changeActiveSlide();
     this.moveSlide(activeSlide.position);
     this.dist.finalPosition = activeSlide.position;
+
+    this.wrapper.dispatchEvent(this.changeEvent);
   }
 
   activeNextSlide() {
@@ -140,10 +143,10 @@ export default class Slide {
   init() {
     this.bindEvents();
     this.addSlideEvents();
-    this.transition(false);
     this.slidesConfig();
-    this.addResizeEvent();
     this.changeSlide(0);
+    this.addResizeEvent();
+    this.transition(false);
     return this;
   }
 }
@@ -158,5 +161,46 @@ export class SlideNav extends Slide {
   addArrowEvents() {
     this.prevElement.addEventListener("click", this.activePrevSlide);
     this.nextElement.addEventListener("click", this.activeNextSlide);
+  }
+
+  createControl() {
+    const control = document.createElement("ul");
+    this.slidesArray.forEach((item, index) => {
+      control.innerHTML += `<li><a href="#slide${index + 1}">${index + 1}</a></li>`;
+    });
+
+    this.wrapper.appendChild(control);
+
+    return control;
+  }
+
+  eventControl(item, index) {
+    item.addEventListener("click", (event) => {
+      event.preventDefault();
+      this.changeSlide(index);
+      this.activeItemControl();
+    });
+    this.wrapper.addEventListener("changeEvent", this.activeItemControl);
+  }
+
+  activeItemControl() {
+    this.controlArray.forEach((item) => item.classList.remove(this.activeClass));
+    this.controlArray[this.index.active].classList.add(this.activeClass);
+  }
+
+  addControl(customControl) {
+    this.bindControl();
+    this.control = document.querySelector(customControl) || this.createControl();
+    this.controlArray = [...this.control.children];
+    this.activeItemControl();
+
+    this.controlArray.forEach(this.eventControl);
+    this.control.dataset.control = "slide";
+  }
+
+  bindControl() {
+    this.createControl = this.createControl.bind(this);
+    this.eventControl = this.eventControl.bind(this);
+    this.activeItemControl = this.activeItemControl.bind(this);
   }
 }
